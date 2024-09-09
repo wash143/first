@@ -1,0 +1,100 @@
+
+POM.xml
+
+<dependencies>
+  	<dependency>
+            <groupId>asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>3.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-bundle</artifactId>
+            <version>1.19.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20170516</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>1.19.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-core</artifactId>
+            <version>1.19.4</version>
+        </dependency>
+  </dependencies>
+
+
+add the jar files in the following folder:
+
+
+
+
+
+
+update web.xml
+
+<servlet>
+        <servlet-name>Jersey Web Application</servlet-name>
+        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Jersey Web Application</servlet-name>
+        <url-pattern>/rest/*</url-pattern>
+    </servlet-mapping>
+
+
+
+program:
+
+package MyRestTest;
+
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+
+@Path("/home")
+public class TestRestBasedAPP {
+	
+	@GET
+	@Produces("text/html")
+	public String getMethod() {
+		return "Hello from REST based API";
+	}
+	
+	@POST
+	@Path("/post")
+	@Produces("text/html")
+	public String postMethod() {
+		return "In the post method Hello from REST based API";
+	}
+	
+	@PUT
+	@Produces("text/html")
+	public String putMethod() {
+		return "In the put method Hello from REST based API";
+	}
+	
+	@DELETE
+	@Produces("text/html")
+	public String delteMethod() {
+		return "In the post method Hello from REST based API";
+	}
+	
+}
+
+
+
+check folder with jar files
+
+
+
