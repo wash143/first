@@ -1,0 +1,121 @@
+Data modelling 3
+
+// create collections
+db.createCollection("movies")
+db.createCollection("productionCompanies")
+db.createCollection("actors")
+db.createCollection("directors")
+
+// insert values
+db.movies.insertMany([
+  {
+    title: "Movie1",
+    year: 2012,
+    length: 120,
+    genre: "horror",
+    plot: "plot1",
+    productionCompany: "ProductionCompany1",
+    actors: ["Actor1"],
+    directors: ["Director1", "Director2", "Director3"]
+  },
+  {
+    title: "Movie2",
+    year: 2010,
+    length: 100,
+    genre: "action",
+    plot: "plot2",
+    productionCompany: "ProductionCompany1",
+    actors: ["Actor2"],
+    directors: ["Director1"]
+  }
+])
+
+db.productionCompanies.insertMany([
+  {
+    name: "ProductionCompany1",
+    address: "address1",
+    movies: ["Movie1", "Movie2"]
+  }
+])
+
+db.actors.insertMany([
+  {
+    id: "Actor1",
+    name: "Actor1",
+    dateOfBirth: ISODate("1990-01-01T00:00:00.000Z"),
+    movies: ["Movie1"],
+    role: "role1"
+  },
+  {
+    id: "Actor2",
+    name: "Actor2",
+    dateOfBirth: ISODate("1995-01-01T00:00:00.000Z"),
+    movies: ["Movie2"],
+    role: "role2"
+  }
+])
+
+db.directors.insertMany([
+  {
+    id: "Director1",
+    name: "Director1",
+    dateOfBirth: ISODate("1980-01-01T00:00:00.000Z"),
+    movies: ["Movie1", "Movie2"]
+  },
+  {
+    id: "Director2",
+    name: "Director2",
+    dateOfBirth: ISODate("1985-01-01T00:00:00.000Z"),
+    movies: ["Movie1"]
+  },
+  {
+    id: "Director3",
+    name: "Director3",
+    dateOfBirth: ISODate("1990-01-01T00:00:00.000Z"),
+    movies: ["Movie1"]
+  }
+])
+
+
+
+
+
+1)List the details of horror movies released in 2012 and directed by more than 2 directors.
+db.movies.find({
+... year:2012,
+... genre:"horror",
+... $expr:{
+... $gt:[{$size: "$directors"},2]}}).pretty();
+
+
+2)List the details of actors who acted in movies having same titles but released before 2000 and after 2010.
+db.actors.find({
+  movies: {
+    $elemMatch: {
+      $in: db.movies.distinct("title", { $or: [{ year: { $lt: 2000 } }, { year: { $gt: 2010 } }] })
+    }
+  }
+})
+
+
+3)
+db.productionCompanies.find({
+  movies: { $size: db.productionCompanies.aggregate([{ $project: { size: { $size: "$movies" } } }, { $group: { _id: null, max: { $max: "$size" } } }]).toArray()[0].max }
+})
+
+
+4)db.movies.find({
+  $and: [
+    { directors: { $elemMatch: { $in: db.directors.distinct("_id", { dateOfBirth: { $in: db.actors.distinct("dateOfBirth") } }) } } },
+    { actors: { $elemMatch: { $in: db.actors.distinct("_id", { dateOfBirth: { $in: db.directors.distinct("dateOfBirth") } }) } } }
+  ]
+})
+
+
+5)db.directors.find({
+  movies: {
+    $elemMatch: {
+      $in: db.productionCompanies.distinct("movies")
+    }
+  }
+})
