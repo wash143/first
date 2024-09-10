@@ -1,0 +1,96 @@
+Complete SQL Database Setup and Queries
+1. Table Creation
+CREATE TABLE Professors (
+ PROFID INT PRIMARY KEY,
+ Name VARCHAR(50),
+ Age INT,
+ `Rank` VARCHAR(20),
+ ResearchSpecialty VARCHAR(50)
+);
+CREATE TABLE Projects (
+ ProjectNumber INT PRIMARY KEY,
+ SponsorName VARCHAR(50),
+ StartDate DATE,
+ EndDate DATE,
+ Budget DECIMAL(10, 2),
+ PrincipalInvestigatorID INT,
+ FOREIGN KEY (PrincipalInvestigatorID) REFERENCES Professors(PROFID)
+);
+CREATE TABLE GraduateStudents (
+ USN INT PRIMARY KEY,
+ Name VARCHAR(50),
+ Age INT,
+ DegreeProgram VARCHAR(20),
+ SupervisorID INT,
+ FOREIGN KEY (SupervisorID) REFERENCES Professors(PROFID)
+);
+CREATE TABLE ProjectProfessors (
+ ProjectNumber INT,
+ PROFID INT,
+ FOREIGN KEY (ProjectNumber) REFERENCES Projects(ProjectNumber),
+ FOREIGN KEY (PROFID) REFERENCES Professors(PROFID)
+);
+CREATE TABLE ProjectStudents (
+ ProjectNumber INT,
+ USN INT,
+ FOREIGN KEY (ProjectNumber) REFERENCES Projects(ProjectNumber),
+ FOREIGN KEY (USN) REFERENCES GraduateStudents(USN)
+);
+2. Data Insertion
+INSERT INTO Professors (PROFID, Name, Age, Rank, ResearchSpecialty) VALUES
+(1, 'Prof. A', 50, 'Professor', 'AI'),
+(2, 'Prof. B', 45, 'Associate Professor', 'Data Science'),
+(3, 'Prof. C', 40, 'Assistant Professor', 'Machine Learning'),
+(4, 'Prof. D', 38, 'Lecturer', 'Quantum Computing');
+INSERT INTO Projects (ProjectNumber, SponsorName, StartDate, EndDate, Budget,
+PrincipalInvestigatorID) VALUES
+(101, 'UGC', '2006-01-01', '2010-12-31', 500000, 1),
+(102, 'AICTE', '2008-03-15', '2012-05-10', 50, 2),
+(103, 'UGC', '2009-06-01', '2011-10-31', 500000, 3),
+(104, 'NSF', '2007-02-01', '2009-12-31', 300000, 4);
+INSERT INTO GraduateStudents (USN, Name, Age, DegreeProgram, SupervisorID) VALUES
+(201, 'Student X', 25, 'MCA', 1),
+(202, 'Student Y', 27, 'ME', 2),
+(203, 'Student Z', 26, 'MPhil', 3),
+(204, 'Student W', 24, 'PhD', 4);
+INSERT INTO ProjectProfessors (ProjectNumber, PROFID) VALUES
+(101, 1),
+(102, 2),
+(103, 3),
+(104, 4),
+(101, 2),
+(102, 1),
+(103, 1),
+(104, 1);
+INSERT INTO ProjectStudents (ProjectNumber, USN) VALUES
+(101, 201),
+(102, 202),
+(103, 203),
+(104, 204),
+(101, 204),
+(102, 203),
+(103, 202),
+(104, 201);
+3. SQL Queries
+a) Retrieve the names of all professors who do not have an ongoing project of more than 100000.
+SELECT Name FROM Professors WHERE PROFID NOT IN (SELECT PrincipalInvestigatorID
+FROM Projects WHERE Budget > 100000);
+b) Retrieve the names of all graduate students along with their professors under whom they work
+and project sponsor.
+SELECT gs.Name AS StudentName, p.Name AS ProfessorName, pr.SponsorName FROM
+GraduateStudents gs JOIN Professors p ON gs.SupervisorID = p.PROFID JOIN ProjectStudents ps
+ON gs.USN = ps.USN JOIN Projects pr ON ps.ProjectNumber = pr.ProjectNumber;
+c) List the professors and the sum of the budget of their projects started after 2005 but ended in
+2010.
+SELECT p.Name, SUM(pr.Budget) AS TotalBudget FROM Professors p JOIN Projects pr ON
+p.PROFID = pr.PrincipalInvestigatorID WHERE pr.StartDate > '2005-01-01' AND pr.EndDate <
+'2010-12-31' GROUP BY p.Name;
+d) List the names of professors who have a total worth of projects greater than the average budget
+of projects sanctioned.
+WITH AvgBudget AS (SELECT AVG(Budget) AS AvgProjectBudget FROM Projects) SELECT
+p.Name FROM Professors p JOIN Projects pr ON p.PROFID = pr.PrincipalInvestigatorID GROUP
+BY p.Name HAVING SUM(pr.Budget) > (SELECT AvgProjectBudget FROM AvgBudget);
+e) List the professors who work on all the projects.
+SELECT p.Name FROM Professors p JOIN ProjectProfessors pp ON p.PROFID = pp.PROFID
+GROUP BY p.PROFID, p.Name HAVING COUNT(DISTINCT pp.ProjectNumber) = (SELECT
+COUNT(*) FROM Projects);
