@@ -1,0 +1,265 @@
+PROGRAM 5:
+package program5;
+
+class Thread1 extends Thread {
+    public void run() {
+        for (int i = 0; i <= 5; i++) {
+            // Check if the thread has been interrupted
+            if (Thread.currentThread().isInterrupted()) {
+                System.out.println("Thread 1 interrupted");
+                return; // Exit the loop and end the thread
+            }
+            System.out.println("Thread 1: " + i);
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                System.out.println("Thread 1 interrupted during sleep");
+                return; // Exit the thread
+            }
+        }
+    }
+}
+
+class Thread2 extends Thread {
+    public void run() {
+        for (int i = 10; i <= 20; i++) {
+            // Check if the thread has been interrupted
+            if (Thread.currentThread().isInterrupted()) {
+                System.out.println("Thread 2 interrupted");
+                return; // Exit the loop and end the thread
+            }
+            System.out.println("Thread 2: " + i);
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                System.out.println("Thread 2 interrupted during sleep");
+                return; // Exit the thread
+            }
+        }
+    }
+}
+
+public class lab5 {
+    public static void main(String[] args) throws Exception {
+        Thread1 t1 = new Thread1();
+        Thread2 t2 = new Thread2();
+
+        t1.start(); // Start Thread1
+        t1.interrupt(); // Interrupt Thread1
+        t2.start(); // Start Thread2
+        
+        // Interrupt only Thread1
+        //Thread.sleep(1000); // Adjusted delay to give Thread1 some time to start
+        //t1.interrupt(); // Interrupt Thread1
+        
+        // Wait for threads to finish if needed
+        t1.join();
+        t2.join();
+    }
+}
+
+
+PROGRAM 6:
+package program6;
+
+public class lab6 {
+    private int material;
+    private boolean available = false;
+
+    // Method to get the material
+    public synchronized int get() {
+        while (!available) {
+            try {
+                wait(); // Wait until material is available
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // Handle interrupt
+            }
+        }
+        available = false;
+        notifyAll(); // Notify all waiting threads
+        return material;
+    }
+
+    // Method to put the material
+    public synchronized void put(int value) {
+        while (available) {
+            try {
+                wait(); // Wait if material is already available
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // Handle interrupt
+            }
+        }
+        material = value;
+        available = true;
+        notifyAll(); // Notify all waiting threads
+    }
+
+    public static class Producer extends Thread {
+        private lab6 shop; // Changed to lab6 to match the class name
+        private int number;
+
+        public Producer(lab6 shop, int number) {
+            this.shop = shop;
+            this.number = number;
+        }
+
+        @Override
+        public void run() {
+            for (int i = 0; i < 10; i++) { // Produce 10 items
+                shop.put(i); // Put item into the shop
+                System.out.println("Producer " + this.number + " put: " + i);
+                try {
+                    sleep((int) (Math.random() * 100)); // Random sleep
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // Handle interrupt
+                }
+            }
+        }
+    }
+
+    public static class Consumer extends Thread {
+        private lab6 shop; // Changed to lab6 to match the class name
+        private int number;
+
+        public Consumer(lab6 shop, int number) {
+            this.shop = shop;
+            this.number = number;
+        }
+
+        @Override
+        public void run() {
+            for (int i = 0; i < 10; i++) { // Consume 10 items
+                int value = shop.get(); // Get item from the shop
+                System.out.println("Consumer " + this.number + " got: " + value);
+                try {
+                    sleep((int) (Math.random() * 100)); // Random sleep
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // Handle interrupt
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        lab6 shop = new lab6(); // Instantiate lab6 object
+        Producer producer = new Producer(shop, 1); // Create a Producer
+        Consumer consumer = new Consumer(shop, 1); // Create a Consumer
+
+        producer.start(); // Start the Producer thread
+        consumer.start(); // Start the Consumer thread
+    }
+}
+
+
+PROGRAM 7:
+package program7;
+
+class IllegalArgumentException extends Exception{
+public IllegalArgumentException(String msg) {
+super(msg);
+System.out.println(msg);
+
+}
+}
+
+class SingletonBank{
+
+private static SingletonBank instance = new SingletonBank();
+private double balance;
+
+private SingletonBank() {
+this.balance = 0.0;
+}
+
+public static synchronized SingletonBank getInstance() {
+return instance;
+}
+
+public synchronized void credit(double amount) throws IllegalArgumentException {
+if (amount < 0) {
+throw new IllegalArgumentException("Amount must be positive");
+}
+balance += amount;
+System.out.println("Credited " + amount + ", new balance: " + balance);
+}
+
+public synchronized void debit(double amount) throws IllegalArgumentException {
+
+if (amount < 0) {
+throw new IllegalArgumentException("Amount must be positive");
+}
+if (balance < amount) {
+throw new IllegalArgumentException("Insufficient funds");
+}
+balance -= amount;
+System.out.println("Debited " + amount + ", new balance: " + balance);
+}
+
+public synchronized double getBalance() {
+return this.balance;
+}
+
+}
+
+class CreditThread extends Thread {
+private final SingletonBank account;
+private final double amount;
+
+CreditThread(SingletonBank account, double amount) {
+this.account = account;
+this.amount = amount;
+}
+
+@Override
+public void run() {
+try {
+
+account.credit(amount);
+
+} catch (IllegalArgumentException e) {
+
+}
+
+}
+}
+
+class DebitThread extends Thread {
+private final SingletonBank account;
+private final double amount;
+
+DebitThread(SingletonBank account, double amount) {
+this.account = account;
+this.amount = amount;
+}
+
+@Override
+public void run() {
+try {
+
+account.debit(amount);
+} catch (IllegalArgumentException e) {
+// TODO Auto-generated catch block
+System.out.println(e);
+}
+
+}
+}
+
+public class lab7 {
+
+public static void main(String[] args) {
+
+// TODO Auto-generated method stub
+SingletonBank account = SingletonBank.getInstance();
+Thread t1 = new CreditThread(account,1000);
+Thread t2 = new DebitThread(account,500);
+Thread t3 = new CreditThread(account,1000);
+Thread t4 = new DebitThread(account,500);
+
+t1.start();
+t2.start();
+t3.start();
+t4.start();
+
+}
+
