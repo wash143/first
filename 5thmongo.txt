@@ -1,0 +1,79 @@
+from pymongo import MongoClient
+
+class MongoDBManager:
+    def _init_(self, db_name, collection_name):
+        self.client = MongoClient('localhost', 27017)
+        self.db = self.client[db_name]
+        self.collection = self.db[collection_name]
+        print("Connected to MongoDB!")
+   
+    def create_document(self):
+        name = input("Enter name: ")
+        age = int(input("Enter age: "))
+        document = {"name": name, "age": age}
+        result = self.collection.insert_one(document)
+        print(f"Document inserted with id: {result.inserted_id}")
+   
+    def read_documents(self):
+        documents = self.collection.find()
+        for doc in documents:
+            print(doc)
+   
+    def update_document(self):
+        name = input("Enter the name of the document to update: ")
+        new_name = input("Enter the new name (leave blank to keep the same): ")
+        new_age = input("Enter the new age (leave blank to keep the same): ")
+        update_fields = {}
+       
+        if new_name:
+            update_fields["name"] = new_name
+        if new_age:
+            update_fields["age"] = int(new_age)
+       
+        if update_fields:
+            result = self.collection.update_one({"name": name}, {"$set": update_fields})
+            if result.matched_count:
+                print("Document updated successfully.")
+            else:
+                print("No document found with the given name.")
+        else:
+            print("No updates provided.")
+   
+    def delete_document(self):
+        name = input("Enter the name of the document to delete: ")
+        result = self.collection.delete_one({"name": name})
+        if result.deleted_count:
+            print("Document deleted successfully.")
+        else:
+            print("No document found with the given name.")
+
+def main():
+    db_name = input("Enter the db name: ")
+    collection_name = input("Enter the collection name: ")
+    db_manager = MongoDBManager(db_name, collection_name)
+   
+    while True:
+        print("\nMenu:")
+        print("1. Create Document")
+        print("2. Read Documents")
+        print("3. Update Document")
+        print("4. Delete Document")
+        print("5. Exit")
+       
+        choice = int(input("Enter your choice: "))
+       
+        if choice == 1:
+            db_manager.create_document()
+        elif choice == 2:
+            db_manager.read_documents()
+        elif choice == 3:
+            db_manager.update_document()
+        elif choice == 4:
+            db_manager.delete_document()
+        elif choice == 5:
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+if _name_ == "_main_":
+    main()
