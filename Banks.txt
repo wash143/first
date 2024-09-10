@@ -1,0 +1,156 @@
+CREATE TABLE Banks (
+BankCode INT PRIMARY KEY,
+Name VARCHAR(50),
+Address VARCHAR(100),
+Phone VARCHAR(15)
+);
+
+CREATE TABLE Branches (
+BranchCode INT PRIMARY KEY,
+Name VARCHAR(50),
+Address VARCHAR(100),
+Phone VARCHAR(15),
+BankCode INT,
+FOREIGN KEY (BankCode) REFERENCES Banks(BankCode)
+);
+
+CREATE TABLE Customers (
+SSN INT PRIMARY KEY,
+Name VARCHAR(50),
+Address VARCHAR(100),
+Phone VARCHAR(15),
+Age INT
+);
+
+CREATE TABLE Accounts (
+AccountNumber INT PRIMARY KEY,
+BranchCode INT,
+AccountType VARCHAR(20),
+Balance DECIMAL(10, 2),
+FOREIGN KEY (BranchCode) REFERENCES Branches(BranchCode)
+);
+
+CREATE TABLE AccountCustomers (
+AccountNumber INT,
+SSN INT,
+FOREIGN KEY (AccountNumber) REFERENCES Accounts(AccountNumber),
+FOREIGN KEY (SSN) REFERENCES Customers(SSN)
+);
+
+CREATE TABLE Loans (
+LoanNumber INT PRIMARY KEY,
+Duration INT,
+InterestRate DECIMAL(5, 2)
+);
+
+CREATE TABLE LoanCustomers (
+LoanNumber INT,
+SSN INT,
+FOREIGN KEY (LoanNumber) REFERENCES Loans(LoanNumber),
+FOREIGN KEY (SSN) REFERENCES Customers(SSN)
+);
+
+INSERT INTO Banks (BankCode, Name, Address, Phone) VALUES
+(1, 'SBI', 'Mumbai', '111-111-1111'),
+(2, 'HDFC', 'Delhi', '222-222-2222');
+
+INSERT INTO Branches (BranchCode, Name, Address, Phone, BankCode) VALUES
+(101, 'SBI Main', 'Bangalore', '123-456-7890', 1),
+(102, 'HDFC Central', 'Bangalore', '098-765-4321', 2),
+(103, 'SBI North', 'Bangalore', '555-555-5555', 1);
+
+INSERT INTO Customers (SSN, Name, Address, Phone, Age) VALUES
+(201, 'John Doe', 'Bangalore', '333-333-3333', 30),
+(202, 'Jane Smith', 'Mumbai', '444-444-4444', 40),
+(203, 'Alice Johnson', 'Bangalore', '666-666-6666', 25);
+
+INSERT INTO Accounts (AccountNumber, BranchCode, AccountType, Balance) VALUES
+(301, 101, 'Savings', 5000),
+(302, 102, 'Savings', 7000),
+(303, 103, 'Savings', 6000);
+INSERT INTO AccountCustomers (AccountNumber, SSN) VALUES
+(301, 201),
+(301, 202),
+(302, 203),
+(303, 201);
+INSERT INTO Loans (LoanNumber, Duration, InterestRate) VALUES
+(401, 5, 7.5),
+(402, 3, 6.5);
+INSERT INTO LoanCustomers (LoanNumber, SSN) VALUES
+(401, 201),
+(402, 202),
+(402, 203);
+
+
+a) List the details of customers who have a joint account and also have at least one
+loan.
+sql
+Copy code
+SELECT DISTINCT c.*
+FROM Customers c
+JOIN AccountCustomers ac ON c.SSN = ac.SSN
+JOIN (
+SELECT AccountNumber
+FROM AccountCustomers
+GROUP BY AccountNumber
+HAVING COUNT(SSN) > 1) joint_accounts ON ac.AccountNumber = joint_accounts.AccountNumber
+JOIN LoanCustomers lc ON c.SSN = lc.SSN;
+
+
+b) List the details of the branch which has given the maximum loan.
+sql
+Copy code
+SELECT b.*
+FROM Branches b
+JOIN Accounts a ON b.BranchCode = a.BranchCode
+JOIN AccountCustomers ac ON a.AccountNumber = ac.AccountNumber
+JOIN LoanCustomers lc ON ac.SSN = lc.SSN
+JOIN Loans l ON lc.LoanNumber = l.LoanNumber
+GROUP BY b.BranchCode
+ORDER BY SUM(l.InterestRate * l.Duration) DESC
+LIMIT 1;
+
+
+c) List the details of savings accounts opened in the SBI branches located in
+Bangalore.
+sql
+Copy code
+SELECT a.*
+FROM Accounts a
+JOIN Branches b ON a.BranchCode = b.BranchCode
+JOIN Banks bn ON b.BankCode = bn.BankCode
+WHERE bn.Name = 'SBI' AND b.Address LIKE '%Bangalore%' AND
+a.AccountType = 'Savings';
+
+
+d) List the name of the branch along with its bank name and the total amount of loans
+given by it.
+sql
+Copy code
+SELECT b.Name AS BranchName, bn.Name AS BankName, SUM(l.InterestRate
+* l.Duration) AS TotalLoanAmount
+FROM Branches b
+JOIN Banks bn ON b.BankCode = bn.BankCode
+JOIN Accounts a ON b.BranchCode = a.BranchCode
+JOIN AccountCustomers ac ON a.AccountNumber = ac.AccountNumber
+JOIN LoanCustomers lc ON ac.SSN = lc.SSN
+JOIN Loans l ON lc.LoanNumber = l.LoanNumber
+GROUP BY b.Name, bn.Name;
+
+
+e) Retrieve the names of customers who have accounts in all the branches located in
+a specific city (e.g., Bangalore).
+sql
+Copy code
+SELECT c.Name
+FROM Customers c
+JOIN AccountCustomers ac ON c.SSN = ac.SSN
+JOIN Accounts a ON ac.AccountNumber = a.AccountNumber
+JOIN Branches b ON a.BranchCode = b.BranchCode
+WHERE b.Address LIKE '%Bangalore%'
+GROUP BY c.SSN, c.Name
+HAVING COUNT(DISTINCT b.BranchCode) = (
+SELECT COUNT(*)
+FROM Branches
+WHERE Address LIKE '%Bangalore%'
+);
