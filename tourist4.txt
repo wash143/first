@@ -1,0 +1,100 @@
+db.tourist_places.insertOne({
+"tourist_place_id": "TP001",
+"name": "Mysore Palace",
+"state": "KARNATAKA",
+"distance_from_capital": 150,
+"history": "Historical palace in Mysore."
+});
+db.tourists.insertOne({
+"tourist_id": "T001",
+"name": "John Doe",
+"age": 30,
+"country": "USA",
+"emails": ["john@example.com", "doe@example.com"]
+});
+db.visits.insertOne({
+"tourist_id": "T001",
+"tourist_place_id": "TP001",
+"visited_date": ISODate("2024-09-01T00:00:00Z")
+});
+Simplified Queries:
+a) List the state name which has the maximum number of tourist places.
+javascript
+Copy code
+db.tourist_places.aggregate([
+{ $group: { _id: "$state", count: { $sum: 1 } } },
+{ $sort: { count: -1 } },
+{ $limit: 1 }
+])
+b) List details of the tourist place where the maximum number of tourists visited.
+javascript
+Copy code
+db.visits.aggregate([
+{ $group: { _id: "$tourist_place_id", count: { $sum: 1 } } },
+{ $sort: { count: -1 } },
+{ $limit: 1 }
+])
+c) List the details of tourists who visited all tourist places of the state "KARNATAKA".
+const totalTouristPlacesInState = db.tourist_places.count({ state:
+"KARNATAKA" });
+db.visits.aggregate([
+{ $lookup: {
+from: "tourist_places",
+localField: "tourist_place_id",
+foreignField: "tourist_place_id",
+as: "place_details"
+}},
+{ $match: { "place_details.state": "KARNATAKA" } },
+{ $group: { _id: "$tourist_id", visited_places: { $addToSet:
+"$tourist_place_id" } } },
+{ $match: { "visited_places": { $size: totalTouristPlacesInState }
+} },
+{ $lookup: {
+from: "tourists",
+localField: "_id",
+foreignField: "tourist_id",
+as: "tourist_details"
+}},
+{ $unwind: "$tourist_details" }
+])
+d) Display the details of the tourists who visited at least one tourist place of the state,
+but visited all states' tourist places.
+const allStates = db.tourist_places.distinct("state");
+db.visits.aggregate([
+{ $lookup: {
+from: "tourist_places",
+localField: "tourist_place_id",
+foreignField: "tourist_place_id",
+as: "place_details"
+}},
+{ $group: { _id: "$tourist_id", states_visited: { $addToSet:
+"$place_details.state" } } },
+{ $match: { states_visited: { $all: allStates } } },
+{ $lookup: {
+from: "tourists",
+localField: "_id",
+foreignField: "tourist_id",
+as: "tourist_details"
+}},
+{ $unwind: "$tourist_details" }
+])
+e) Display the details of the tourist place visited by tourists from all countries.
+const allCountries = db.tourists.distinct("country");
+db.visits.aggregate([
+{ $lookup: {
+from: "tourists",
+localField: "tourist_id",
+foreignField: "tourist_id",
+as: "tourist_details"
+}},
+{ $group: { _id: "$tourist_place_id", countries_visited: {
+$addToSet: "$tourist_details.country" } } },
+{ $match: { countries_visited: { $all: allCountries } } },
+{ $lookup: {
+from: "tourist_places",
+localField: "_id",
+foreignField: "tourist_place_id",
+as: "tourist_place_details"
+}},
+{ $unwind: "$tourist_place_details" }
+])
