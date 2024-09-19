@@ -1,0 +1,126 @@
+- Create SolarPanel table
+CREATE TABLE SolarPanel (
+    PV_Module INT PRIMARY KEY,
+    Type VARCHAR(20),
+    InstallationCharge INT,
+    WarrantyPeriod INT
+);
+
+-- Create Vendor table
+CREATE TABLE Vendor (
+    TIN_No INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Address VARCHAR(100),
+    ContactDetails VARCHAR(50)
+);
+
+-- Create User table
+CREATE TABLE User (
+    House_Office_No INT PRIMARY KEY,
+    Address VARCHAR(100),
+    PlaceType VARCHAR(20) -- 'Domestic' or 'Commercial'
+);
+
+-- Create Installation table
+CREATE TABLE Installation (
+    InstallationID INT PRIMARY KEY,
+    PV_Module INT,
+    TIN_No INT,
+    House_Office_No INT,
+    DateOfInstallation DATE,
+    Capacity INT,
+    FOREIGN KEY (PV_Module) REFERENCES SolarPanel(PV_Module),
+    FOREIGN KEY (TIN_No) REFERENCES Vendor(TIN_No),
+    FOREIGN KEY (House_Office_No) REFERENCES User(House_Office_No)
+);
+
+-- Insert data into SolarPanel
+INSERT INTO SolarPanel (PV_Module, Type, InstallationCharge, WarrantyPeriod) VALUES
+(1, 'Monocrystalline', 60000, 25),
+(2, 'Polycrystalline', 40000, 15);
+
+-- Insert data into Vendor
+INSERT INTO Vendor (TIN_No, Name, Address, ContactDetails) VALUES
+(101, 'Ajay Kumar', 'Delhi', 'ajay@example.com'),
+(102, 'Sunita Sharma', 'Mumbai', 'sunita@example.com');
+
+-- Insert data into User
+INSERT INTO User (House_Office_No, Address, PlaceType) VALUES
+(1001, '123 Street, Delhi', 'Domestic'),
+(1002, '456 Street, Mumbai', 'Commercial'),
+(1003, '789 Street, Delhi', 'Domestic'),
+(1004, '101 Street, Mumbai', 'Commercial');
+
+-- Insert data into Installation
+INSERT INTO Installation (InstallationID, PV_Module, TIN_No, House_Office_No, DateOfInstallation, Capacity) VALUES
+(1, 1, 101, 1001, '2023-01-01', 5),
+(2, 2, 102, 1002, '2023-02-01', 10),
+(3, 1, 101, 1003, '2023-03-01', 7),
+(4, 2, 102, 1004, '2023-04-01', 15);
+
+
+Q1
+SELECT Vendor.Name, COUNT(*) AS NumberOfInstallations
+FROM Installation
+JOIN Vendor ON Installation.TIN_No = Vendor.TIN_No
+JOIN User ON Installation.House_Office_No = User.House_Office_No
+WHERE User.PlaceType = 'Domestic'
+GROUP BY Vendor.Name
+ORDER BY NumberOfInstallations DESC
+LIMIT 1;
+
+
+
+Q2
+SELECT User.Address, MAX(Installation.Capacity) AS MaxCapacity
+FROM Installation
+JOIN User ON Installation.House_Office_No = User.House_Office_No
+GROUP BY User.Address
+ORDER BY MaxCapacity DESC
+LIMIT 1;
+   
+
+
+
+Q3
+SELECT DISTINCT User.Address
+FROM Installation
+JOIN User ON Installation.House_Office_No = User.House_Office_No
+JOIN SolarPanel ON Installation.PV_Module = SolarPanel.PV_Module
+WHERE SolarPanel.Type = 'Monocrystalline';
+
+
+
+
+Q4
+SELECT SolarPanel.Type, SUM(SolarPanel.InstallationCharge) AS TotalInstallationCharges
+FROM Installation
+JOIN User ON Installation.House_Office_No = User.House_Office_No
+JOIN SolarPanel ON Installation.PV_Module = SolarPanel.PV_Module
+WHERE User.Address = '123 Street, Delhi'
+GROUP BY SolarPanel.Type;
+
+
+
+Q5
+SELECT Vendor.Name, Vendor.Address, Vendor.ContactDetails, SolarPanel.PV_Module, SolarPanel.Type
+FROM Installation
+JOIN Vendor ON Installation.TIN_No = Vendor.TIN_No
+JOIN SolarPanel ON Installation.PV_Module = SolarPanel.PV_Module
+ORDER BY Installation.DateOfInstallation ASC
+LIMIT 1;
+
+
+
+Q6
+SELECT SolarPanel.Type, AVG(SolarPanel.InstallationCharge) AS AverageSales
+FROM Installation
+JOIN User ON Installation.House_Office_No = User.House_Office_No
+JOIN SolarPanel ON Installation.PV_Module = SolarPanel.PV_Module
+WHERE User.PlaceType = 'Commercial'
+GROUP BY SolarPanel.Type;
+
+
+
+
+
