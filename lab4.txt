@@ -1,0 +1,401 @@
+// Patient Collection
+db.patient.insertOne({
+  ssn: 312,
+  name: 'Jagan',
+  city: 'Bangalore',
+  age: 24,
+  doctor: ['D101'],
+  prescribe: ['P1']
+})
+
+db.patient.insertOne({
+  ssn: 123,
+  name: 'Vikas',
+  city: 'Mysore',
+  age: 19,
+  doctor: ['D102', 'D101'],
+  prescribe: ['P2', 'P4']
+})
+
+db.patient.insertOne({
+  ssn: 231,
+  name: 'Mansoor',
+  city: 'Mysore',
+  age: 20,
+  doctor: ['D103'],
+  prescribe: ['P3']
+})
+
+// Doctor Collection
+db.doctor.insertOne({
+  ssn: 'D101',
+  name: 'Suresh',
+  expert: 'eye',
+  yoe: 12
+})
+
+db.doctor.insertOne({
+  ssn: 'D102',
+  name: 'Ramesh',
+  expert: 'heart',
+  yoe: 21
+})
+
+db.doctor.insertOne({
+  ssn: 'D103',
+  name: 'Ganesh',
+  expert: 'eye',
+  yoe: 23
+})
+
+// Prescribe Collection
+db.prescribe.insertOne({
+  pid: 'P1',
+  patient: 312,
+  doctor: 'D101',
+  drug: ['aspirin', 'dolo'],
+  date: new Date('2013-10-23'),
+  Quantity: 1
+})
+
+db.prescribe.insertOne({
+  pid: 'P2',
+  patient: 123,
+  doctor: 'D102',
+  drug: ['aspirin', 'crocin'],
+  date: new Date('2013-01-03'),
+  Quantity: 4
+})
+
+db.prescribe.insertOne({
+  pid: 'P3',
+  patient: 231,
+  doctor: 'D103',
+  drug: ['morphine', 'dolo'],
+  date: new Date('2012-11-12'),
+  Quantity: 2
+})
+
+db.prescribe.insertOne({
+  pid: 'P4',
+  patient: 123,
+  doctor: 'D101',
+  drug: ['aspirin', 'paracetomol'],
+  date: new Date('2013-06-05'),
+  Quantity: 1
+})
+
+// PCom Collection
+db.pcom.insertOne({
+  name: 'biogen',
+  city: 'bangalore',
+  phone: 423521,
+  drug: ['aspirin', 'morphine']
+})
+
+db.pcom.insertOne({
+  name: 'elilily',
+  city: 'bangalore',
+  phone: 324324,
+  drug: ['dolo']
+})
+
+db.pcom.insertOne({
+  name: 'novopharm',
+  city: 'mysore',
+  phone: 3424234,
+  drug: ['crocin']
+})
+
+// Drug Collection
+db.drug.insertOne({
+  name: 'aspirin',
+  formula: 'sd7d8'
+})
+
+db.drug.insertOne({
+  name: 'paracetomol',
+  formula: 'dsd8sd9'
+})
+
+db.drug.insertOne({
+  name: 'morphine',
+  formula: 'sd9sd9s'
+})
+
+db.drug.insertOne({
+  name: 'dolo',
+  formula: 'sd0sds9'
+})
+
+db.drug.insertOne({
+  name: 'crocin',
+  formula: 'sd9ds9'
+})
+
+// Pharma Collection
+db.pharm.insertOne({
+  name: 'corner shop',
+  city: 'bangalore',
+  phone: 4324324,
+  drug: [
+    { name: 'aspirin', price: '10' },
+    { name: 'dolo', price: 5 },
+    { name: 'morphine', price: '8' }
+  ],
+  contract: ['C1', 'C2']
+})
+
+db.pharm.insertOne({
+  name: 'highland shop',
+  city: 'bangalore',
+  phone: 3424234,
+  drug: [
+    { name: 'aspirin', price: '8' },
+    { name: 'morphine', price: '10' },
+    { name: 'crocin', price: 3 }
+  ],
+  contract: ['C3', 'C4']
+})
+
+// Contract Collection
+db.contract.insertOne({
+  id: 'C1',
+  pcomname: 'biogen',
+  stdate: '2001-12-03',
+  endate: '2031-12-03',
+  sup: 'Sup1',
+  text: 'hbdvjasbdhgcsagdbjhsdvasvdas'
+})
+
+db.contract.insertOne({
+  id: 'C2',
+  pcomname: 'novopharm',
+  stdate: '2001-12-03',
+  endate: '2031-12-03',
+  sup: 'Sup3',
+  text: 'dsadjhasvhdhsadvgsahdvhsad'
+})
+
+db.contract.insertOne({
+  id: 'C3',
+  pcomname: 'elilily',
+  stdate: '2001-12-03',
+  endate: '2031-12-03',
+  sup: 'Sup2',
+  text: 'dsahjdhsabvhdashdbhjsak'
+})
+
+db.contract.insertOne({
+  id: 'C4',
+  pcomname: 'biogen',
+  stdate: '2001-12-03',
+  endate: '2031-12-03',
+  sup: 'Sup1',
+  text: 'dhjsdhsabdhvsauydjhsav'
+})
+
+// Assistant Collection
+db.assistant.insertMany([
+  {
+    ssn: 'AS001',
+    name: 'Priyanka',
+    address: 'Sirsi',
+    yoe: "10",
+    wards: ["general", "icu", "op-theatre"]
+  },
+  {
+    ssn: 'AS002',
+    name: 'Shashant',
+    address: 'Agra',
+    yoe: "10",
+    wards: ["icu", "op-theatre"]
+  },
+  {
+    ssn: 'AS003',
+    name: 'Prajna',
+    address: 'mysuru',
+    yoe: "2",
+    wards: ["general"]
+  },
+  {
+    ssn: 'AS004',
+    name: 'Preetam',
+    address: 'Sagar',
+    yoe: "12",
+    wards: ["icu"]
+  },
+  {
+    ssn: 'AS005',
+    name: 'Manoj',
+    address: 'Hubballi',
+    yoe: "5",
+    wards: ["general", "icu"]
+  },
+  {
+    ssn: 'AS006',
+    name: 'Ashwin',
+    address: 'Chennai',
+    yoe: "7",
+    wards: []
+  }
+])
+
+// Query 1
+db.patient.aggregate([
+  { $match: { age: 20 } },
+  { 
+    $lookup: {
+      from: "doctor",
+      localField: "doctor",
+      foreignField: "ssn",
+      as: "doctorDetails"
+    }
+  },
+  { $unwind: "$doctorDetails" },
+  { $match: { "doctorDetails.expert": "eye" } },
+  { 
+    $project: {
+      _id: 0,
+      ssn: 1,
+      name: 1,
+      city: 1,
+      age: 1,
+      doctor: "$doctorDetails.name"
+    }
+  }
+])
+
+// Extra Insertions
+db.prescribe.insertMany([
+  { pid: 'P5', patient: 312, doctor: 'D101', drug: ['aspirin'], date: new Date('2013-02-15'), quantity: 1 },
+  { pid: 'P6', patient: 123, doctor: 'D101', drug: ['crocin'], date: new Date('2013-05-20'), quantity: 2 },
+  { pid: 'P7', patient: 231, doctor: 'D101', drug: ['dolo'], date: new Date('2013-07-30'), quantity: 3 },
+  { pid: 'P8', patient: 312, doctor: 'D102', drug: ['aspirin'], date: new Date('2013-03-10'), quantity: 1 },
+  { pid: 'P9', patient: 123, doctor: 'D102', drug: ['paracetamol'], date: new Date('2013-09-15'), quantity: 2 }
+])
+
+// Query 2
+db.prescribe.aggregate([
+  { 
+    $match: {
+      date: { 
+        $gte: new ISODate("2013-01-01T00:00:00Z"),
+        $lt: new ISODate("2014-01-01T00:00:00Z")
+      }
+    }
+  },
+  { 
+    $group: {
+      _id: { doctor: "$doctor", patient: "$patient" }
+    }
+  },
+  { 
+    $group: {
+      _id: "$_id.doctor",
+      uniquePatientCount: { $sum: 1 }
+    }
+  },
+  { 
+    $match: {
+      uniquePatientCount: { $gt: 2 }
+    }
+  },
+  { 
+    $lookup: {
+      from: "doctor",
+      localField: "_id",
+      foreignField: "ssn",
+      as: "doctorDetails"
+    }
+  },
+  { $unwind: "$doctorDetails" },
+  { 
+    $project: {
+      _id: 0,
+      ssn: "$doctorDetails.ssn",
+      name: "$doctorDetails.name",
+      specialty: "$doctorDetails.specialty",
+      yoe: "$doctorDetails.yoe",
+      uniquePatientCount: 1
+    }
+  }
+])
+
+// Query 3
+db.doctor.aggregate([
+  { 
+    $group: {
+      _id: null,
+      maxExperience: { $max: "$yoe" }
+    }
+  },
+  { $unwind: "$maxExperience" },
+  { 
+    $lookup: {
+      from: "doctor",
+      localField: "maxExperience",
+      foreignField: "yoe",
+      as: "doctorsWithMaxExperience"
+    }
+  },
+  { 
+    $project: {
+      _id: 0,
+      doctorsWithMaxExperience: 1
+    }
+  }
+])
+
+// Query 4
+db.pcom.aggregate([
+  { $unwind: "$drug" },
+  { 
+    $group: {
+      _id: { name: "$name", city: "$city" },
+      count: { $sum: 1 }
+    }
+  },
+  { 
+    $match: { 
+      count: { $gte: 2 }
+    }
+  },
+  { 
+    $project: {
+      _id: 0,
+      name: "$_id.name",
+      city: "$_id.city"
+    }
+  }
+])
+
+// Query 5
+db.assistant.find({
+  wards: "op-theatre"
+})
+
+// Query 6
+db.pharm.aggregate([
+  { $unwind: "$drug" },
+  { 
+    $group: {
+      _id: "$drug.name",
+      pharmacies: { $addToSet: "$name" },
+      count: { $sum: 1 }
+    }
+  },
+  { 
+    $match: { 
+      count: { $gte: db.pharm.find().count() }
+    }
+  },
+  { 
+    $project: {
+      _id: 0,
+      drug: "$_id",
+      pharmacies: 1
+    }
+  }
+])
+
